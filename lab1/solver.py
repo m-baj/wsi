@@ -1,0 +1,111 @@
+import time
+import numpy as np
+from gradient_descent import gradient_descent
+
+
+LEARNING_RATES = [0.001, 0.01, 0.1, 0.5, 1]
+EPSILON = 1e-6
+
+
+class Function:
+    def __init__(self, f, grad, dim, domain):
+        self.f = f
+        self.grad = grad
+        self.dim = dim
+        self.domain = domain
+
+
+class Experiment:
+    def __init__(self, f, start_point, learning_rate, epsilon, max_iter):
+        self.function = f
+        self.start_point = start_point
+        self.l_rate = learning_rate
+        self.eps = epsilon
+        self.max_iter = max_iter
+
+    def conduct(self):
+        dur, iters, path, min, is_min_found = self._find_minimum()
+        result = ExpResult(self, dur, iters, path, min, is_min_found)
+        return result
+
+    def _find_minimum(self):
+        time_start = time.time()
+        minimum, path_to_min, iterations = gradient_descent(
+            self.function.f,
+            self.function.grad,
+            self.start_point,
+            self.l_rate,
+            self.eps,
+            self.max_iter,
+        )
+        time_end = time.time()
+        dur = time_end - time_start
+        # is_min_found = np.linalg.norm(self.function.grad(*minimum)) <= self.eps
+        return dur, iterations, path_to_min, minimum, True
+
+
+class ExpResult:
+    def __init__(
+        self, experiment, duration, iterations, path_to_min, minimum, is_min_found
+    ):
+        self.experiment = experiment
+        self.duration = duration
+        self.iterations = iterations
+        self.path_to_min = path_to_min
+        self.minimum = minimum
+
+
+class Solver:
+    def __init__(self, iterations_number, f):
+        self.iterations_number = iterations_number
+        self.f = f
+        self.experiments = []
+        self.results = []
+
+    def get_experiments_number(self):
+        return len(self.experiments)
+
+    def generate_experiments(self, number_of_experiments):
+        for _ in range(number_of_experiments):
+            self._create_experiment(np.random.choice(LEARNING_RATES), EPSILON)
+
+    def solve(self):
+        for exp in self.experiments:
+            result = exp.conduct()
+            self.results.append(result)
+
+    def _create_experiment(self, learning_rate, epsilon):
+        start = self._get_random_point()
+        new_exp = Experiment(
+            self.f, start, learning_rate, epsilon, self.iterations_number
+        )
+        self.experiments.append(new_exp)
+
+    def _get_random_point(self):
+        left, right = self.f.domain
+        return np.random.uniform(left, right, self.f.dim - 1)
+
+
+# func = Function(
+#     lambda x: np.sin(np.pi * x) + x**2,
+#     lambda x: np.pi * np.cos(np.pi * x) + 2 * x,
+#     2,
+#     (-5, 5),
+# )
+
+# func2 = Function(
+#     lambda x1, x2: 5 * np.exp(2)
+#     - 4 * np.exp(1) * x1
+#     + x1**2
+#     + 2 * np.exp(1) * x2
+#     + x2**2,
+#     lambda x1, x2: np.array([-4 * np.exp(1) + 2 * x1, 2 * np.exp(1) + 2 * x2]),
+#     3,
+#     (-5, 5),
+# )
+# solver = Solver(1000, func2)
+
+# solver.generate_experiments(10)
+# solver.solve()
+# for res in solver.results:
+#     print(res.minimum)
