@@ -40,8 +40,8 @@ class Experiment:
         )
         time_end = time.time()
         dur = time_end - time_start
-        # is_min_found = np.linalg.norm(self.function.grad(*minimum)) <= self.eps
-        return dur, iterations, path_to_min, minimum, True
+        is_min_found = np.linalg.norm(self.function.grad(*minimum)) <= self.eps
+        return dur, iterations, path_to_min, minimum, is_min_found
 
 
 class ExpResult:
@@ -53,12 +53,14 @@ class ExpResult:
         self.iterations = iterations
         self.path_to_min = path_to_min
         self.minimum = minimum
+        self.is_min_found = is_min_found
 
 
 class Solver:
-    def __init__(self, iterations_number, f):
+    def __init__(self, iterations_number, f, learning_rates):
         self.iterations_number = iterations_number
         self.f = f
+        self.l_rates = learning_rates
         self.experiments = []
         self.results = []
 
@@ -67,12 +69,30 @@ class Solver:
 
     def generate_experiments(self, number_of_experiments):
         for _ in range(number_of_experiments):
-            self._create_experiment(np.random.choice(LEARNING_RATES), EPSILON)
+            self._create_experiment(np.random.choice(self.l_rates), EPSILON)
 
     def solve(self):
         for exp in self.experiments:
             result = exp.conduct()
             self.results.append(result)
+
+    def get_results_data(self):
+        return [
+            [
+                res.experiment.l_rate,
+                res.experiment.start_point,
+                res.minimum,
+                res.duration,
+                res.iterations,
+            ]
+            for res in self.results
+        ]
+
+    def get_sorted_results_dict(self):
+        return {
+            l_rate: [res for res in self.results if res.experiment.l_rate == l_rate]
+            for l_rate in self.l_rates
+        }
 
     def _create_experiment(self, learning_rate, epsilon):
         start = self._get_random_point()
@@ -84,28 +104,3 @@ class Solver:
     def _get_random_point(self):
         left, right = self.f.domain
         return np.random.uniform(left, right, self.f.dim - 1)
-
-
-# func = Function(
-#     lambda x: np.sin(np.pi * x) + x**2,
-#     lambda x: np.pi * np.cos(np.pi * x) + 2 * x,
-#     2,
-#     (-5, 5),
-# )
-
-# func2 = Function(
-#     lambda x1, x2: 5 * np.exp(2)
-#     - 4 * np.exp(1) * x1
-#     + x1**2
-#     + 2 * np.exp(1) * x2
-#     + x2**2,
-#     lambda x1, x2: np.array([-4 * np.exp(1) + 2 * x1, 2 * np.exp(1) + 2 * x2]),
-#     3,
-#     (-5, 5),
-# )
-# solver = Solver(1000, func2)
-
-# solver.generate_experiments(10)
-# solver.solve()
-# for res in solver.results:
-#     print(res.minimum)
