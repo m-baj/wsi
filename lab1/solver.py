@@ -24,8 +24,8 @@ class Experiment:
         self.max_iter = max_iter
 
     def conduct(self):
-        dur, iters, path, min, is_min_found = self._find_minimum()
-        result = ExpResult(self, dur, iters, path, min, is_min_found)
+        dur, iters, path, min = self._find_minimum()
+        result = ExpResult(self, dur, iters, path, min)
         return result
 
     def _find_minimum(self):
@@ -40,20 +40,16 @@ class Experiment:
         )
         time_end = time.time()
         dur = time_end - time_start
-        is_min_found = np.linalg.norm(self.function.grad(*minimum)) <= self.eps
-        return dur, iterations, path_to_min, minimum, is_min_found
+        return dur, iterations, path_to_min, minimum
 
 
 class ExpResult:
-    def __init__(
-        self, experiment, duration, iterations, path_to_min, minimum, is_min_found
-    ):
+    def __init__(self, experiment, duration, iterations, path_to_min, minimum):
         self.experiment = experiment
         self.duration = duration
         self.iterations = iterations
         self.path_to_min = path_to_min
         self.minimum = minimum
-        self.is_min_found = is_min_found
 
 
 class Solver:
