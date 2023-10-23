@@ -17,7 +17,7 @@ def generate_table(data, function, expected_global_min):
     df_sorted = df.sort_values(by=SORT_BY)
     df_sorted["czy znaleziono minimum globalne"] = df_sorted[
         "wynik działania algorytmu"
-    ].apply(lambda x: np.isclose(function.f(x), expected_global_min, rtol=1e-3))
+    ].apply(lambda x: np.isclose(function.f(*x), expected_global_min, rtol=1e-3))
     df_sorted["czy znaleziono minimum globalne"] = df_sorted[
         "czy znaleziono minimum globalne"
     ].apply(lambda x: "Tak" if x else "Nie")
