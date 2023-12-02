@@ -25,7 +25,13 @@ class State:
 
 
 def calculate_heuristic_for(current_state):
-    pass
+    N = current_state.tokens_left
+    K = current_state.max_tokens_to_take
+    i = (N - K - 2) / (K + 1)
+    if i.is_integer():
+        return -1
+    else:
+        return 1
 
 
 def calculate_value_for(current_state):

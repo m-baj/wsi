@@ -43,7 +43,7 @@ class MiniMaxPlayer(Player):
 
     def _calculate_tokens_to_remove(self, tokens_left, max_tokens_to_remove):
         current_state = State(tokens_left, True, max_tokens_to_remove)
-        best_value = -np.inf
+        best_value = INITIAL_ALPHA
         best_move = None
         for state in current_state.get_child_states():
             value = minimax(state, self.depth, False, INITIAL_ALPHA, INITIAL_BETA)
