@@ -25,9 +25,19 @@ def gradient_descent(
     iterations = 0
     x = x0
     for i in range(max_iter):
-        x = x - learning_rate * grad(*x)
+        gradient = grad(*x)
+        x = x - learning_rate * gradient
         iterations += 1
-        if np.linalg.norm(grad(*x)) <= epsilon:
+        if np.linalg.norm(gradient) <= epsilon:
             break
         all_points = np.append(all_points, [x], axis=0)
     return x, all_points, iterations
+
+
+x0 = np.array([1.0, 1.0])
+f = lambda x, y: x**2 + y**2
+grad = lambda x, y: np.array([2 * x, 2 * y])
+
+x, all_points, iterations = gradient_descent(f, grad, x0)
+print(x)
+print(iterations)
